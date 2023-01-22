@@ -33,4 +33,19 @@ Please fill in the sections below after you complete the challenge.
 
 ### What I'm Pleased With
 
+I implemented the shortest path algorithm as a breadth-first search directly on the 2D array. 
+Had the steps between coordinates been weighted, I would have used Dijkstra's shortest path algorithm. 
+
+The pathfinder module handles input error cases, namely:
+1. P and/or Q are outside the bounds of the 2D grid. 
+2. There is no possible path between P and Q. 
+
+I have achieved 100% code coverage (by line) of pathfind.py in the test_pathfind.py suite. This suite tests 
+success cases, the error cases handled above, edge cases such as P and Q coinciding, and tests that the 
+algorithm returns quickly on a 100x100 array.  
+
+
 ### What I Would Have Done With More Time
+
+I would have added more accessors to the pathfind module to return properties of the map and a visual representations. 
+I could also have enhanced the module to run as a script and accept input from the command line. 
