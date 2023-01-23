@@ -1,7 +1,7 @@
 import pytest
 
-from src.pathfind import pathfind, Coord
-from src.exception import NoPossiblePath, OutOfBoundsError
+from ..src.pathfind import pathfind, Coord
+from ..src.exception import NoPossiblePath, OutOfBoundsError
 
 
 def test_success_case():

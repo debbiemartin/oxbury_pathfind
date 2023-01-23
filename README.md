@@ -47,5 +47,5 @@ algorithm returns quickly on a 100x100 array.
 
 ### What I Would Have Done With More Time
 
-I would have added more accessors to the pathfind module to return properties of the map and a visual representations. 
-I could also have enhanced the module to run as a script and accept input from the command line. 
+I would have added more accessors to the pathfind module to return properties of the map and a visual representation. 
+I could also have enhanced the module to run as a script and accept input from the command line or a file. 
