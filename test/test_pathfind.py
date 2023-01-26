@@ -65,8 +65,14 @@ def test_large_map():
     shortest = pathfind(array=array, p=Coord(50, 20), q=Coord(50, 30))
     assert(shortest == 10)
 
+def test_q_outside_of_struct():
+    array = """. P . . . .
+    . # # # # .
+    . . . . . . #
+    . . . . . . . Q
+    . . . . . . #
+    # # # # # #"""
 
-    
-
-    
+    shortest = pathfind(array=array, p=Coord(1,0), q=Coord(7, 3))
+    assert(shortest == 9)
 
