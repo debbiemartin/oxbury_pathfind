@@ -1,4 +1,4 @@
-from typing import List, Tuple
+from typing import List, Tuple, Optional
 from collections import namedtuple, deque
 
 from .exception import OutOfBoundsError, NoPossiblePath
@@ -29,7 +29,7 @@ class Map(object):
     def __init__(self, array: str, p: Coord, q: Coord):
         self.array = list(map(lambda x: x.split(), array.split("\n")))
         self.y_extent = len(self.array)
-        self.x_extent = len(self.array[0])
+        #self.x_extent = len(self.array[0])
         self._validate_coord(p)
         self.p = p
         self._validate_coord(q)
@@ -46,14 +46,17 @@ class Map(object):
                     bool: Whether or not the coordinate is valid. 
         """
         errors = []
+        y_invalid = False
         if coord.y < 0:
             errors.append("y coordinate must not be negative")
+            y_invalid = True
         if coord.x < 0:
             errors.append("x coordinate must not be negative")
         if coord.y >= self.y_extent:
             errors.append(f"y coordinate must be maximum {self.y_extent-1}")
-        if coord.x >= self.x_extent:
-            errors.append(f"x coordinate must be maximum {self.x_extent-1}")
+            y_invalid = True
+        if not y_invalid and coord.x >= len(self.array[coord.y]):
+            errors.append(f"x coordinate must be maximum {len(self.array[coord.y])}")
         
         if len(errors) > 0:
             raise OutOfBoundsError(f"Invalid coordinate ({coord.x}, {coord.y}): {errors})")
@@ -88,6 +91,31 @@ class Map(object):
             neighbour = Coord(x=x, y=y)
             if self._is_passable(neighbour):
                 yield neighbour
+
+    def _get_heuristic(self, coord: Coord):
+        (i, j) = coord
+        (x, y) = self.q
+        return max(abs(x - i), abs(y - j))
+
+    def _get_shortest_path_recursive(self, coord: Coord, steps: int, previous_coord: Coord = None) -> Optional[int]:
+        if coord == self.q:
+            return steps
+        print(self._get_neighbours(coord))
+        print(self._get_neighbours(coord)).sort(key=lambda x: self._get_heuristic(x))
+        neighbours = list(self._get_neighbours(coord)).sort(key=lambda x: self._get_heuristic(x))
+        
+
+        # Don't go back on yourself
+        if previous_coord:
+            neighbours = list(filter(neighbours, lambda x: x != previous_coord))
+        if not neighbours:
+            return None
+
+        for neighbour in neighbours:
+            steps_total = self._get_shortest_path_recursive(neighbour, steps+1, previous_coord=coord)
+            if steps_total:
+                return steps_total
+
     
     def get_shortest_path(self) -> int:
         """
@@ -99,18 +127,12 @@ class Map(object):
         """
         if self.p == self.q:
             return 0
-        visited = set([self.p])
-        queue = deque([(self.p, 0)])
 
-        while len(queue) > 0:
-            coord, steps = queue.popleft()
-            for neighbour in self._get_neighbours(coord):
-                if neighbour == self.q:
-                    return steps + 1
-                if neighbour not in visited:
-                    queue.append((neighbour, steps + 1))
-                    visited.add(neighbour)
+        steps_total = self._get_shortest_path_recursive(self.p, 1)
         
+        if steps_total:
+            return steps_total
+    
         raise NoPossiblePath("Not possible to reach Q from P")
 
 
