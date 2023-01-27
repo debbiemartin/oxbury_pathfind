@@ -1,9 +1,11 @@
-from typing import List, Tuple
+from typing import List, Tuple, Optional
 from collections import namedtuple, deque
 
 from .exception import OutOfBoundsError, NoPossiblePath
+from .priority_queue import PriorityQueue
 
 Coord = namedtuple("Coord", "x y") 
+
 
 class Map(object):
     """
@@ -19,8 +21,6 @@ class Map(object):
         The game map as a 2D array.
     y_extent : int
         The size of the game map in the y extent. 
-    x_extent : int
-        The size of the game map in the y extent. 
     p : Coord
         The start coordinate. 
     q : Coord
@@ -29,7 +29,6 @@ class Map(object):
     def __init__(self, array: str, p: Coord, q: Coord):
         self.array = list(map(lambda x: x.split(), array.split("\n")))
         self.y_extent = len(self.array)
-        self.x_extent = len(self.array[0])
         self._validate_coord(p)
         self.p = p
         self._validate_coord(q)
@@ -46,14 +45,18 @@ class Map(object):
                     bool: Whether or not the coordinate is valid. 
         """
         errors = []
+        y_valid = True
         if coord.y < 0:
             errors.append("y coordinate must not be negative")
+            y_valid = False
         if coord.x < 0:
             errors.append("x coordinate must not be negative")
         if coord.y >= self.y_extent:
             errors.append(f"y coordinate must be maximum {self.y_extent-1}")
-        if coord.x >= self.x_extent:
-            errors.append(f"x coordinate must be maximum {self.x_extent-1}")
+            y_valid = False
+
+        if y_valid and coord.x >= (x_extent := len(self.array[coord.y])):
+            errors.append(f"x coordinate out of range for line {coord.y}. Must be maximum {x_extent}")
         
         if len(errors) > 0:
             raise OutOfBoundsError(f"Invalid coordinate ({coord.x}, {coord.y}): {errors})")
@@ -113,6 +116,43 @@ class Map(object):
         
         raise NoPossiblePath("Not possible to reach Q from P")
 
+    def _heuristic(self, a: Coord, b: Coord) -> int:
+        """
+        Manhattan distance heuristic.
+        """
+        return abs(a.x-b.x) + abs(a.y-b.y)
+
+    def get_shortest_path_astar(self):
+        """
+        Perform an A* search to find the shortest path between
+        the P and Q coordinates via passable squares. 
+
+            Returns:
+                    int: The number of steps in the shortest path between P and Q. 
+        """
+
+        visited = set()
+        distance = {self.p: 0}
+        frontier = PriorityQueue()
+        frontier.add(self.p)
+        while frontier:
+            node = frontier.pop()
+            if node in visited:
+                continue
+            if node == self.q:
+                return distance[node]
+            visited.add(node)
+            for successor in self._get_neighbours(node):
+                frontier.add(
+                    successor,
+                    priority=distance[node] + 1 + self._heuristic(successor, self.q)
+                )
+                if (successor not in distance
+                    or distance[node] + 1 < distance[successor]):
+                    distance[successor] = distance[node] + 1
+
+        raise NoPossiblePath("Not possible to reach Q from P")
+
 
 def pathfind(array: str, p: Coord, q: Coord):
     """
@@ -127,5 +167,5 @@ def pathfind(array: str, p: Coord, q: Coord):
                 int: The number of steps in the shortest path between P and Q. 
     """
     grid_map = Map(array, p, q)
-    return grid_map.get_shortest_path()
+    return grid_map.get_shortest_path_astar()
 
