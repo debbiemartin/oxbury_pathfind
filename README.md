@@ -33,8 +33,9 @@ Please fill in the sections below after you complete the challenge.
 
 ### What I'm Pleased With
 
-I implemented the shortest path algorithm as a breadth-first search directly on the 2D array. 
-Had the steps between coordinates been weighted, I would have used Dijkstra's shortest path algorithm. 
+I implemented the shortest path algorith with 2 optiona:
+1. Breadth-first search directly on the 2D array. Had the steps between coordinates been weighted, I would have used Dijkstra's shortest path algorithm.
+2. A* search using the Manhattan distance as the heuristic. The heuristic adds weights to nodes based on how likely they are to be successful in finding the shortest path. Choice of the correct heuristic should therefore speed up the shortest path finding, however the heuristic can mean that it is not guaranteed that the shortest path is found. Note that in the case the heuristic is flat that this is equivalent to Dijkstra's algorithm.
 
 The pathfinder module handles input error cases, namely:
 1. P and/or Q are outside the bounds of the 2D grid. 
